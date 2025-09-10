@@ -1,189 +1,170 @@
 # Kanban Board Project
 
-## Code Review Summary and Fixes
+A full-featured Kanban board built with Next.js, MongoDB, Redux Toolkit, Socket.io, and react-beautiful-dnd. Supports real-time collaboration, drag-and-drop, optimistic UI, and CRUD for boards, columns, and tasks.
 
-During the code review, I identified and fixed several architectural and code issues:
+---
 
-1. **Prop Drilling Issue**: Components were passing props through multiple levels unnecessarily. Fixed by implementing React Context for state management.
+## Features
 
-2. **Performance Bottlenecks**: Identified unnecessary re-renders in task components. Implemented React.memo and useCallback hooks to optimize performance.
+- **CRUD Operations** for Boards, Columns, and Tasks
+- **Drag & Drop** between columns (react-beautiful-dnd)
+- **Optimistic UI** for instant feedback and rollback on errors
+- **Real-time Updates** via Socket.io (WebSockets)
+- **Redux State Management** for scalable global state
+- **Accessibility**: ARIA labels, keyboard navigation, high contrast mode
+- **User Assignment**: Assign users to tasks, avatar display
+- **Filtering & Search**: Search and filter tasks by multiple criteria
+- **Performance Optimizations**: Code splitting, memoization, virtualized lists
 
-3. **State Management**: The application was using local component state for global data. Refactored to use Redux for better state management across components.
+---
 
-4. **Accessibility Problems**: Missing ARIA labels, poor keyboard navigation, and insufficient color contrast. Added proper ARIA attributes, improved keyboard support, and enhanced color contrast.
+## Prerequisites
 
-5. **Repeated Logic**: Multiple components were duplicating API call logic. Extracted these into custom hooks for better reusability and maintainability.
-
-## Architecture Overview
-
-### State Management
-
-The application uses Redux for state management with the following key slices:
-
-- `boardsSlice`: Manages board data and columns
-- `tasksSlice`: Handles task operations and updates
-- `usersSlice`: Manages user data and assignments
-- `uiSlice`: Controls UI state like filters and search terms
-
-### Real-time Updates
-
-Implemented using WebSockets (via Socket.io) for real-time synchronization:
-
-- When a user makes changes (adds, edits, moves tasks), the update is immediately reflected in the UI
-- The change is sent to the server via WebSocket
-- Server broadcasts the change to all connected clients
-- Clients update their local state to reflect the change
-
-### Drag-and-Drop
-
-Implemented using `react-beautiful-dnd`:
-
-- Tasks can be dragged between columns
-- Visual feedback provided during drag operations
-- State updates automatically when tasks are moved
-- Works seamlessly with real-time updates
-
-### Optimistic UI
-
-All user actions show immediate UI updates:
-
-- Tasks appear moved before server confirmation
-- If server request fails, UI reverts with error notification
-- Provides smooth user experience without waiting for server responses
-
-## Testing Instructions
-
-### Running Tests
-
-To run the test suite:
-
-```bash
-npm test
-```
-
-To run tests with coverage report:
-
-```bash
-npm test -- --coverage --watchAll=false
-```
-
-### Test Coverage
-
-The project has achieved 85% code coverage across components and core logic:
-
-- Components: 82% coverage
-- Reducers: 90% coverage
-- Custom Hooks: 88% coverage
-- Utilities: 92% coverage
-
-### Writing Tests
-
-Tests are written using Jest and React Testing Library. Key testing patterns:
-
-- Render components with appropriate providers (Redux, Router)
-- Mock API calls and WebSocket connections
-- Simulate user interactions (clicks, drags, form entries)
-- Verify state changes and UI updates
-
-## Steps to Run Locally
-
-### Prerequisites
-
-- Node.js (v14 or higher)
+- Node.js (v16 or higher recommended)
 - npm or yarn
+- MongoDB instance (local or cloud)
 
-### Installation
+---
 
-1. Clone the repository:
+## Installation
 
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Ayush4ace/task.git
+
+   or 
+    ssh:
+   git clone git@github.com:Ayush4ace/task.git
+   cd assigned-mern-todo
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables:**
+
+   Copy the example file and edit your MongoDB and Socket.io URLs:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   Edit `.env.local`:
+   ```
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/<dbname>?retryWrites=true&w=majority
+   NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
+   ```
+
+---
+
+## Running the App Locally
+
+1. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+   The app will be available at [http://localhost:3000](http://localhost:3000).
+
+2. **(Optional) Start the Socket.io backend for real-time updates:**
+
+   If using a custom backend for Socket.io, start it separately:
+   ```bash
+   cd server
+   npm install
+   npm run dev
+   ```
+   The backend runs on port `3001` by default.
+
+---
+
+## Project Structure
+
+```
+src/
+  app/           # Next.js app router and API routes
+  components/    # React components (Board, Column, Task, etc.)
+  lib/           # MongoDB models, socket client, utilities
+  store/         # Redux slices and store setup
+public/          # Static assets
+.env.local       # Environment variables
+```
+
+---
+
+## API Endpoints
+
+- `POST /api/board` - Create board
+- `GET /api/board` - Get all boards
+- `PUT /api/board/:id` - Update board
+- `DELETE /api/board/:id` - Delete board
+
+- `POST /api/column` - Create column
+- `PUT /api/column/:id` - Update column
+- `DELETE /api/column/:id` - Delete column
+
+- `POST /api/task` - Create task
+- `PUT /api/task/:id` - Update task
+- `DELETE /api/task/:id` - Delete task
+
+---
+
+## Real-time Collaboration
+
+- Changes (add/edit/move tasks) are broadcast to all connected clients via Socket.io.
+- UI updates instantly (optimistic), then confirms with server.
+- Rollback and error notifications if server rejects changes.
+
+---
+
+## Testing
+
+- **Run all tests:**
+  ```bash
+  npm test
+  ```
+- **Coverage report:**
+  ```bash
+  npm test -- --coverage --watchAll=false
+  ```
+- Tests use Jest and React Testing Library.
+
+---
+
+## Accessibility
+
+- Full keyboard navigation
+- ARIA labels and roles
+- High contrast mode
+- Screen reader compatibility
+
+---
+
+## Production Build
+
+To build for production:
 ```bash
-git clone <repository-url>
-cd kanban-board
-```
-
-2. Install dependencies:
-
-```bash
-npm install
-```
-
-3. Set up environment variables:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your configuration:
-
-```
-REACT_APP_API_URL=http://localhost:3001
-REACT_APP_WS_URL=ws://localhost:3001
-```
-
-4. Start the development server:
-
-```bash
+npm run build
 npm start
 ```
 
-### Real-time Setup
+---
 
-For real-time functionality, you need to set up the backend server:
+## Troubleshooting
 
-1. Navigate to the server directory:
+- Ensure MongoDB URI is correct and accessible.
+- If using real-time features, make sure Socket.io backend is running.
+- For any issues, check logs in the terminal and browser console.
 
-```bash
-cd server
-```
+---
 
-2. Install server dependencies:
+## License
 
-```bash
-npm install
-```
+MIT
 
-3. Start the server:
+---
 
-```bash
-npm run dev
-```
+## Contributing
 
-The server runs on port 3001 and supports WebSocket connections for real-time updates.
-
-### Production Build
-
-To create a production build:
-
-```bash
-npm run build
-```
-
-## Additional Features Implemented
-
-### User Assignment
-
-- Users can be assigned to tasks with avatar display
-- User management interface for adding/removing team members
-- Visual indicators of assigned users on task cards
-
-### Filtering and Search
-
-- Search tasks by title or description
-- Filter by assignee, priority, or tags
-- Combined filters for precise task finding
-- Persistent filter settings across sessions
-
-### Performance Optimizations
-
-- Code splitting with React.lazy for route-based chunking
-- Memoization of expensive computations
-- Virtualized scrolling for large task lists
-- Bundle optimization with tree shaking
-
-### Accessibility Improvements
-
-- Full keyboard navigation support
-- Screen reader compatibility
-- Proper focus management
-- High contrast mode support
-- ARIA landmarks and roles throughout
+Pull requests and issues are welcome!
